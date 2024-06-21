@@ -9,57 +9,55 @@
       </div>
     </div>
     <div>
-    <input type="file" ref="fileInput" @change="handleFileChange" style="display: none" />
-    <button class="custom-btn btn-9 mt-5" @click="triggerFileInput">Upload JSON</button>
-    <div v-if="fileName" class="mt-3">
-      <p>Uploaded file: {{ fileName }}</p>
-      <textarea v-model="fileContent" readonly rows="10" cols="50"></textarea>
+      <input type="file" webkitdirectory directory ref="fileInput" @change="handleFileChange" style="display: none" />
+    <button class="custom-btn btn-9 mt-5" @click="triggerFileInput">Upload Folder</button>
+      <p v-if="folderName" class="text-white mt-3">Uploaded files: {{ folderName }}</p>
     </div>
   </div>
-  </div>
-
 </template>
-<script>
-export default {
-  data() {
-    return {
-      fileName: '',
-      fileContent: ''
-    };
-  },
-  methods: {
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    handleFileChange(event) {
-      const file = event.target.files[0];
-      if (file && file.type === "application/json") {
-        this.fileName = file.name;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const json = JSON.parse(e.target.result);
-            this.fileContent = JSON.stringify(json, null, 2);
-            this.readFile(json);
-          } catch (error) {
-            console.error("Error parsing JSON file", error);
-            this.fileName = '';
-            this.fileContent = '';
-          }
-        };
-        reader.readAsText(file);
-      } else {
-        console.error("Please upload a valid JSON file.");
-        this.fileName = '';
-        this.fileContent = '';
+<script setup>
+import { ref } from 'vue';
+
+// Create a reference for the file input element and reactive variables for the folder name and JSON object
+const fileInput = ref(null);
+const folderName = ref('');
+const jsonObject = ref({ name: '', html: '', css: '' });
+
+// Method to trigger the hidden file input
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+// Method to handle file change event
+const handleFileChange = (event) => {
+  const files = Array.from(event.target.files);
+  folderName.value = files[0].webkitRelativePath.split('/')[0]; // Extract folder name
+  jsonObject.value.name = folderName.value;
+
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      let content = e.target.result;
+
+      // Convert Windows-style newlines to Unix-style
+      content = content.replace(/\r\n/g, '\n');
+
+      if (file.type === 'text/html') {
+        jsonObject.value.html = content;
+      } else if (file.type === 'text/css') {
+        jsonObject.value.css = content;
       }
-    },
-    readFile(json) {
-      console.log("JSON file content:", json);
-    }
-  }
-}
+
+      // Check if both html and css are read before logging
+      if (jsonObject.value.html && jsonObject.value.css) {
+        console.log(jsonObject.value);
+      }
+    };
+    reader.readAsText(file);
+  });
+};
 </script>
+
 
 <style>
 .custom-btn {
@@ -86,7 +84,7 @@ export default {
 
 .btn-9:after {
   position: absolute;
-  content: " ";
+  content: ' ';
   z-index: -1;
   top: 0;
   left: 0;
@@ -96,10 +94,11 @@ export default {
 }
 
 .btn-9:hover {
-  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
-    -4px -4px 6px 0 rgba(116, 125, 136, .2),
-    inset -4px -4px 6px 0 rgba(255, 255, 255, .5),
-    inset 4px 4px 6px 0 rgba(116, 125, 136, .3);
+  box-shadow:
+    4px 4px 6px 0 rgba(255, 255, 255, 0.5),
+    -4px -4px 6px 0 rgba(116, 125, 136, 0.2),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, 0.5),
+    inset 4px 4px 6px 0 rgba(116, 125, 136, 0.3);
   color: black;
 }
 
@@ -107,9 +106,10 @@ export default {
   -webkit-transform: scale(2) rotate(180deg);
   transform: scale(2) rotate(180deg);
   background: white;
-  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
-    -4px -4px 6px 0 rgba(116, 125, 136, .2),
-    inset -4px -4px 6px 0 rgba(255, 255, 255, .5),
-    inset 4px 4px 6px 0 rgba(116, 125, 136, .3);
+  box-shadow:
+    4px 4px 6px 0 rgba(255, 255, 255, 0.5),
+    -4px -4px 6px 0 rgba(116, 125, 136, 0.2),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, 0.5),
+    inset 4px 4px 6px 0 rgba(116, 125, 136, 0.3);
 }
 </style>
