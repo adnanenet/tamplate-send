@@ -9,10 +9,11 @@
       </div>
     </div>
     <div>
-      <input type="file" webkitdirectory directory ref="fileInput" @change="handleFileChange" style="display: none" />
+    <input type="file" webkitdirectory directory ref="fileInput" @change="handleFileChange" style="display: none" multiple />
     <button class="custom-btn btn-9 mt-5" @click="triggerFileInput">Upload Folder</button>
-      <p v-if="folderName" class="text-white mt-3">Uploaded files: {{ folderName }}</p>
-    </div>
+    <p v-if="folderName" class="text-white mt-3">Uploaded folder: {{ folderName }}</p>
+    <button v-if="jsonObject.name" class="custom-btn btn-9 mt-3" @click="downloadJson">Download JSON</button>
+  </div>
   </div>
 </template>
 <script setup>
@@ -28,6 +29,11 @@ const triggerFileInput = () => {
   fileInput.value.click();
 };
 
+// Method to escape double quotes and handle line breaks
+const escapeContent = (content) => {
+  return content.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n');
+};
+
 // Method to handle file change event
 const handleFileChange = (event) => {
   const files = Array.from(event.target.files);
@@ -39,8 +45,8 @@ const handleFileChange = (event) => {
     reader.onload = (e) => {
       let content = e.target.result;
 
-      // Convert Windows-style newlines to Unix-style
-      content = content.replace(/\r\n/g, '\n');
+      // Escape content
+      content = escapeContent(content);
 
       if (file.type === 'text/html') {
         jsonObject.value.html = content;
@@ -50,11 +56,22 @@ const handleFileChange = (event) => {
 
       // Check if both html and css are read before logging
       if (jsonObject.value.html && jsonObject.value.css) {
-        console.log(jsonObject.value);
+        console.log(JSON.stringify(jsonObject.value, null, 2));
       }
     };
     reader.readAsText(file);
   });
+};
+
+// Method to download the JSON object as a file
+const downloadJson = () => {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonObject.value, null, 2));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", `${jsonObject.value.name}.json`);
+  document.body.appendChild(downloadAnchorNode); // Required for Firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
 };
 </script>
 
