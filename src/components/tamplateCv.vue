@@ -9,13 +9,58 @@
       </div>
     </div>
     <div>
-      <input type="file" @change="onFileChange" accept=".json" />
-    <button class="custom-btn btn-9 mt-5" @click="readFile">send</button>
-    <pre v-if="jsonData">{{ jsonData }}</pre>
+    <input type="file" ref="fileInput" @change="handleFileChange" style="display: none" />
+    <button class="custom-btn btn-9 mt-5" @click="triggerFileInput">Upload JSON</button>
+    <div v-if="fileName" class="mt-3">
+      <p>Uploaded file: {{ fileName }}</p>
+      <textarea v-model="fileContent" readonly rows="10" cols="50"></textarea>
     </div>
+  </div>
   </div>
 
 </template>
+<script>
+export default {
+  data() {
+    return {
+      fileName: '',
+      fileContent: ''
+    };
+  },
+  methods: {
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (file && file.type === "application/json") {
+        this.fileName = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const json = JSON.parse(e.target.result);
+            this.fileContent = JSON.stringify(json, null, 2);
+            this.readFile(json);
+          } catch (error) {
+            console.error("Error parsing JSON file", error);
+            this.fileName = '';
+            this.fileContent = '';
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        console.error("Please upload a valid JSON file.");
+        this.fileName = '';
+        this.fileContent = '';
+      }
+    },
+    readFile(json) {
+      console.log("JSON file content:", json);
+    }
+  }
+}
+</script>
+
 <style>
 .custom-btn {
   width: 130px;
