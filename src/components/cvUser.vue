@@ -9,16 +9,10 @@ const cvContent = ref(null);
 
 const getTemplateData = () => {
   if (model.value.templateData) {
-    return { template: model.value.templateData.template };
+    return { name: model.value.templateData.template };
   }
   return {};
 };
-
-onMounted(() => {
-  console.log(getTemplateData());
-});
-
-// html loaded
 
 const getHtmlContent = () => {
   if (cvContent.value) {
@@ -41,12 +35,6 @@ const getHtmlContent = () => {
   return {};
 };
 
-defineExpose({
-  getHtmlContent
-});
-
-// css loaded
-
 const loadStyles = async () => {
   const response = await fetch('/src/assets/tamplate.scss');
   const cssText = await response.text();
@@ -65,7 +53,6 @@ const loadStyles = async () => {
     css: cssWithValues
   };
 
-  console.log(cssObject);
   return cssObject;
 };
 
@@ -84,8 +71,25 @@ const replaceVBindVariables = (css, variables) => {
   });
 };
 
-onMounted(() => {
-  loadStyles();
+const getTemplateDataCombined = async () => {
+  const templateData = getTemplateData();
+  const htmlContent = getHtmlContent();
+  const cssContent = await loadStyles();
+
+  return {
+    name: templateData.name,
+    html: htmlContent.html,
+    css: cssContent.css
+  };
+};
+
+onMounted(async () => {
+  const combinedData = await getTemplateDataCombined();
+  console.log(combinedData);
+});
+
+defineExpose({
+  getHtmlContent
 });
 
 
