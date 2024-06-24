@@ -7,6 +7,16 @@ const resume = ref(resumeData)
 const model = ref(cvSettings)
 const cvContent = ref(null);
 
+const getTemplateData = () => {
+  if (model.value.templateData) {
+    return { template: model.value.templateData.template };
+  }
+  return {};
+};
+
+onMounted(() => {
+  console.log(getTemplateData());
+});
 
 // html loaded
 
@@ -51,7 +61,12 @@ const loadStyles = async () => {
     setUnderlineLinks: model.value.templateData?.typography.underlineLinks ? 'underline' : 'none'
   });
 
-  console.log(cssWithValues);
+  const cssObject = {
+    css: cssWithValues
+  };
+
+  console.log(cssObject);
+  return cssObject;
 };
 
 const extractCssContent = (css) => {
@@ -69,7 +84,9 @@ const replaceVBindVariables = (css, variables) => {
   });
 };
 
-onMounted(loadStyles);
+onMounted(() => {
+  loadStyles();
+});
 
 
 // other variables
