@@ -5,14 +5,30 @@ import { resumeData,cvSettings } from "@/data";
 
 const resume = ref(resumeData)
 const model = ref(cvSettings)
-
-// html loaded
-
 const cvContent = ref(null);
 
 
+// html loaded
+
 const getHtmlContent = () => {
-  return cvContent.value ? cvContent.value.innerHTML : '';
+  if (cvContent.value) {
+    const html = cvContent.value.innerHTML;
+    // Remove data-v-* attributes
+    const cleanedHtml = html.replace(/ data-v-[a-z0-9]+=""/g, '');
+
+    // Parse HTML string into a document
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(cleanedHtml, 'text/html');
+
+    // Convert document to an object
+    const htmlObject = {
+      doctype: doc.doctype ? doc.doctype.name : 'html',
+      html: doc.documentElement.outerHTML
+    };
+
+    return htmlObject;
+  }
+  return {};
 };
 
 defineExpose({
