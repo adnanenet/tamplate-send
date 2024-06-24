@@ -83,13 +83,14 @@ const getTemplateDataCombined = async () => {
   };
 };
 
+const data = ref({});
+
 onMounted(async () => {
-  const combinedData = await getTemplateDataCombined();
-  console.log(combinedData);
+  data.value = await getTemplateDataCombined();
 });
 
 defineExpose({
-  getHtmlContent
+  data,
 });
 
 

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import SendPage from '../views/SendPage.vue'
 import cvTmplate from '../views/cvTmplate.vue'
 
 
@@ -8,13 +8,13 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
-    },
-    {
-      path: '/cv',
       name: 'cv',
       component: cvTmplate
+    },
+    {
+      path: '/go',
+      name: 'go',
+      component: SendPage
     },
   ]
 

@@ -1,10 +1,9 @@
 <script setup>
-import tamplateCv from '../components/tamplateCv.vue'
+import SendButton from '../components/SendButton.vue'
 </script>
 
 <template>
 
-    <tamplateCv />
   
 </template>
 

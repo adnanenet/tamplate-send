@@ -1,14 +1,20 @@
+<template>
+  <div>
+    <cvUser ref="cvUserComponent" />
+    <SendButton :data="cvUserData" />
+  </div>
+</template>
+
 <script setup>
-import { ref, onMounted } from 'vue';
-import cvUser from '@/components/cvUser.vue';
+import { ref, onMounted, nextTick } from 'vue';
+import cvUser from '../components/cvUser.vue';
+import SendButton from '../components/SendButton.vue';
 
-const cvComponentRef = ref(null);
+const cvUserComponent = ref(null);
+const cvUserData = ref({});
 
-onMounted(() => {
-  // No additional logging here to avoid duplicates
+onMounted(async () => {
+  await nextTick(); // Ensure that cvUser component is mounted
+  cvUserData.value = cvUserComponent.value.data;
 });
 </script>
-
-<template>
-  <cvUser ref="cvComponentRef" />
-</template>
