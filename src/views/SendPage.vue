@@ -1,5 +1,5 @@
 <script setup>
-import SendButton from '../components/SendButton.vue'
+
 </script>
 
 <template>

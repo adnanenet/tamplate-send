@@ -1,11 +1,14 @@
 <script setup >
-import {computed, ref, onMounted } from "vue";
+import { ref, onMounted, toRaw, defineExpose, defineEmits, computed } from "vue";
 import { resumeData,cvSettings } from "@/data";
 
+
+const emit = defineEmits(['data-loaded']);
 
 const resume = ref(resumeData)
 const model = ref(cvSettings)
 const cvContent = ref(null);
+
 
 const getTemplateData = () => {
   if (model.value.templateData) {
@@ -17,19 +20,13 @@ const getTemplateData = () => {
 const getHtmlContent = () => {
   if (cvContent.value) {
     const html = cvContent.value.innerHTML;
-    // Remove data-v-* attributes
     const cleanedHtml = html.replace(/ data-v-[a-z0-9]+=""/g, '');
-
-    // Parse HTML string into a document
     const parser = new DOMParser();
     const doc = parser.parseFromString(cleanedHtml, 'text/html');
-
-    // Convert document to an object
     const htmlObject = {
       doctype: doc.doctype ? doc.doctype.name : 'html',
-      html: doc.documentElement.outerHTML
+      html: doc.documentElement.outerHTML,
     };
-
     return htmlObject;
   }
   return {};
@@ -38,7 +35,7 @@ const getHtmlContent = () => {
 const loadStyles = async () => {
   const response = await fetch('/src/assets/tamplate.scss');
   const cssText = await response.text();
-  
+
   const cleanedCssText = extractCssContent(cssText);
   const cssWithValues = replaceVBindVariables(cleanedCssText, {
     backgroundColor: model.value.templateData?.theme.background,
@@ -46,11 +43,11 @@ const loadStyles = async () => {
     primaryColor: model.value.templateData?.theme.primary,
     textColor: model.value.templateData?.theme.text,
     setBorderRadius: model.value.templateData?.company_logo.borderRadius + 'px',
-    setUnderlineLinks: model.value.templateData?.typography.underlineLinks ? 'underline' : 'none'
+    setUnderlineLinks: model.value.templateData?.typography.underlineLinks ? 'underline' : 'none',
   });
 
   const cssObject = {
-    css: cssWithValues
+    css: cssWithValues,
   };
 
   return cssObject;
@@ -79,18 +76,19 @@ const getTemplateDataCombined = async () => {
   return {
     name: templateData.name,
     html: htmlContent.html,
-    css: cssContent.css
+    css: cssContent.css,
   };
 };
 
-const data = ref({});
+const loadData = async () => {
+  const data = await getTemplateDataCombined();
+  emit('data-loaded', data);
+};
 
-onMounted(async () => {
-  data.value = await getTemplateDataCombined();
-});
+defineExpose({ loadData });
 
-defineExpose({
-  data,
+onMounted(() => {
+  loadData();
 });
 
 
